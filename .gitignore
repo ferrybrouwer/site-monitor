@@ -2,4 +2,5 @@ webserver/node_modules/
 client/node_modules/
 tester/node_modules/
 webserver/logs/
+webserver/data/
 .idea/
