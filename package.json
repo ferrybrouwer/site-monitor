@@ -1,0 +1,19 @@
+{
+  "name": "site-monitor",
+  "version": "1.0.0",
+  "description": "Site performance monitoring",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ferrybrouwer/site-monitor.git"
+  },
+  "author": "Ferry Brouwer <ferry@happy-online.nl>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ferrybrouwer/site-monitor/issues"
+  },
+  "homepage": "https://github.com/ferrybrouwer/site-monitor"
+}
