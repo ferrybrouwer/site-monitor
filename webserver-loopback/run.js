@@ -105,3 +105,14 @@ console.log('Check if server.js is available...');
         console.log('Run webserver...');
         return childprocess('slc run .');
     });
+
+
+
+/*
+    @todo:
+
+    - Run mongodb in LoopBack
+    - Create Site model
+    - Write test to insert site
+    - Write test to get site
+*/
