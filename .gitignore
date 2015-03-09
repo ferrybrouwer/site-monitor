@@ -1,7 +1,10 @@
-webserver/node_modules/
+webserver-express/node_modules/
 webserver-loopback/node_modules/
+node_modules/
+data/
+logs/
 client/node_modules/
 tester/node_modules/
-webserver/logs/
-webserver/data/
+webserver-express/logs/
+webserver-express/data/
 .idea/

@@ -1,9 +1,0 @@
-extends layout
-
-block content
-    h1.
-        Sites
-    ul
-        each site, i in sites
-            li
-                a(href="#{site.url}")= site.name

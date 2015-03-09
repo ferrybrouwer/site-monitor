@@ -152,7 +152,7 @@ De database kan gemakkelijk worden uitgebreid als er in de toekomst andere site 
 		"site_id": 1,
 		"published_date": ISODate("2010-09-24"),
 		"https": 0,
-		"www": 0,
+		"www": 0,	
 		"message": "",
 		"success": 1
 		"statusCode": 200,
@@ -161,6 +161,39 @@ De database kan gemakkelijk worden uitgebreid als er in de toekomst andere site 
 		"time_total": 2000,
 		"ip": "0.0.0.0"
 	}
+
+### Endpoints
+Endpoints voor de webserver zijn:
+
+Site information
+
+	/api/site
+
+
+Site form
+
+	/api/site/form
+
+
+Site test information
+
+	/api/site/test
+
+
+Site specific test information
+
+	/api/site/test/?type=xxx
+
+
+Form type information
+
+	/api/form-type
+
+
+Notification settings information
+
+	/api/settings/notification
+
 
 -----
 
