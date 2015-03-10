@@ -7,6 +7,9 @@
     "host": "127.0.0.1",
     "port": 12345,
     "database": "site_monitor_dev",
-    "connector": "mongodb"
+    "password": "happy123",
+    "name": "site_monitor_dev",
+    "connector": "mongodb",
+    "user": "admin"
   }
 }
