@@ -1,84 +1,107 @@
 "use strict";
 
-var fs           = require('./fs'),
-    childprocess = require('./childprocess'),
-    path         = require('path');
+var path         = require('path'),
+    fs           = require('./fs'),
+    childprocess = require('./childprocess');
 
 /**
- * Start mongodb server
- * @returns {Promise}
+ * DebugRunner Class
+ * @constructor
  */
-function startMongodbServer() {
-    var cmd = [
-        'mongod',
-        '--dbpath ' + path.resolve(__dirname, '../../', 'data'),
-        '--port 12345',
-        '--fork',
-        '--noauth',
-        '--logpath ' + path.resolve(__dirname, '../../', 'logs') + '/mongodb.log'
-    ].join(' ');
+function DebugRunner() {
+    // attach terminate signals to cleanup processes
+    process.on('SIGTERM', this.cleanup);
+    process.on('SIGINT', this.cleanup);
 
-    return childprocess(cmd, 'Start mongodb server', false, true);
+    // start promise
+    this.startPromise();
 }
-/**
- * Clean up code
- * @return {function}
- */
-function cleanUp() {
-    var exit = function () {
+
+DebugRunner.prototype = {
+    constructor: DebugRunner,
+
+    /**
+     * Start promise running
+     */
+    startPromise: function() {
+        // check if directory is a LoopBack project directory
+        fs.isLoopBackDir(path.resolve(__dirname, '../'))
+
+            // check if LoopBack directory contains a package.json
+            .then(fs.dirContainsPackagejson, this.onError)
+
+            // when package.json is found in LoopBack project directory, install dependency packages
+            .then(function () {
+                return childprocess('npm install', 'Install webserver node packages');
+            }, this.onError)
+
+            // check if data directory exist, to store database (mongodb) files
+            .then(fs.dirDataExist, this.onError)
+
+            // when data directory exists, first kill current running mongodb server process
+            .then(function () {
+                return childprocess('killall mongod', 'Stop running mongodb servers', true);
+            }, this.onError)
+
+            // restart mongodb server, even when previous running mongod process returns a signal
+            .then(this.startServer, this.startServer)
+
+            // start LoopBack webserver by the `slc run` command
+            .then(function () {
+                //childprocess('slc run .', 'Run webserver using `slc run`');
+                // @todo: check why slc cant run!!
+            }, this.onError)
+
+            // show notification server is up and running
+            .then(function () {
+                console.log('Up and running...');
+            }, this.onError);
+    },
+
+    /**
+     * Clean up mongodb server process
+     */
+    cleanup: function () {
+        childprocess('killall mongod', 'Stop running mongodb servers', true)
+            .then(this.exit, this.exit);
+    },
+
+    /**
+     * Error handler
+     * @param {string} err
+     */
+    onError: function (err) {
+        console.error(err);
+        this.exit();
+    },
+
+    /**
+     * Exit process
+     */
+    exit: function () {
         process.exit(0);
-    };
-    childprocess('killall mongod', 'Stop running mongodb servers', true).then(exit, exit);
-}
+    },
 
-/**
- * Error handler
- * @param {string} err
- */
-function onError(err) {
-    console.error(err);
-    process.exit(0);
-}
+    /**
+     * Start Mongodb server in debian mode using --fork
+     * @returns {Promise}
+     */
+    startServer: function () {
+        var cmd = [
+            'mongod',
+            '--dbpath ' + path.resolve(__dirname, '../../', 'data'),
+            '--port 12345',
+            '--fork',
+            '--noauth',
+            '--logpath ' + path.resolve(__dirname, '../../', 'logs') + '/mongodb.log'
+        ].join(' ');
 
-/**
- * When node process received the SIGTERM or SIGINT command clean up code
- * @return {function}
- */
-process.on('SIGTERM', cleanUp);
-process.on('SIGINT', cleanUp);
+        return childprocess(cmd, 'Start mongodb server', false, true);
+    }
+};
 
-
-
-//   ____                                          _
-//  |  _ \ _   _ _ __    _ __  _ __ ___  _ __ ___ (_)___  ___
-//  | |_) | | | | '_ \  | '_ \| '__/ _ \| '_ ` _ \| / __|/ _ \
-//  |  _ <| |_| | | | | | |_) | | | (_) | | | | | | \__ \  __/
-//  |_| \_\\__,_|_| |_| | .__/|_|  \___/|_| |_| |_|_|___/\___|
-//                      |_|
-fs.isLoopBackDir(path.resolve(__dirname, '../'))
-
-    .then(fs.dirContainsPackagejson, onError)
-
-    .then(function () {
-        return childprocess('npm install', 'Install webserver node packages');
-    }, onError)
-
-    .then(fs.dirDataExist, onError)
-
-    .then(function () {
-        return childprocess('killall mongod', 'Stop running mongodb servers', true);
-    }, onError)
-
-    .then(startMongodbServer, startMongodbServer)
-
-    .then(function () {
-        //childprocess('slc run .', 'Run webserver using `slc run`');
-        // @todo: check why slc cant run!!
-    }, onError)
-
-    .then(function () {
-        console.log('Up and running...');
-    }, onError);
+// instantiate debug runner
+module.exports = new DebugRunner();
 
 /*
  @todo:
